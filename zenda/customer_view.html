@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZENDA - Payment</title>
+  <script src="https://js.paystack.co/v1/inline.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+    body { background: #F8FAFC; min-height: 100vh; padding: 20px; }
+    .container { max-width: 420px; margin: 0 auto; }
+    
+    .header { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 24px; }
+    .verified { background: #ECFDF5; color: #059669; padding: 6px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
+    
+    .logo { font-size: 2rem; font-weight: 800; letter-spacing: -2px; color: #4F46E5; }
+    
+    .card { background: white; border-radius: 24px; padding: 28px; box-shadow: 0 4px 24px rgba(0,0,0,0.06); margin-bottom: 20px; }
+    
+    .vendor { text-align: center; margin-bottom: 24px; }
+    .vendor-name { font-size: 1.1rem; font-weight: 600; color: #1E293B; }
+    .vendor-label { font-size: 0.75rem; color: #64748B; margin-top: 4px; }
+    
+    .order-card { background: #F8FAFC; border-radius: 16px; padding: 20px; margin-bottom: 24px; }
+    .order-title { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; color: #64748B; margin-bottom: 12px; }
+    .order-item { font-size: 1.1rem; font-weight: 600; color: #1E293B; margin-bottom: 8px; }
+    .order-amount { font-size: 2rem; font-weight: 800; color: #4F46E5; }
+    .order-customer { font-size: 0.85rem; color: #64748B; margin-top: 12px; padding-top: 12px; border-top: 1px solid #E2E8F0; }
+    
+    .btn-pay { width: 100%; padding: 20px; background: linear-gradient(135deg, #4F46E5, #7C3AED); color: white; border: none; border-radius: 16px; font-size: 1.1rem; font-weight: 700; cursor: pointer; transition: all 0.2s; box-shadow: 0 8px 24px rgba(79, 70, 229, 0.3); }
+    .btn-pay:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(79, 70, 229, 0.4); }
+    .btn-pay:disabled { background: #94A3B8; cursor: not-allowed; transform: none; box-shadow: none; }
+    
+    .whatsapp { display: block; text-align: center; margin-top: 16px; color: #059669; text-decoration: none; font-size: 0.9rem; font-weight: 500; }
+    .whatsapp:hover { text-decoration: underline; }
+    
+    .security { text-align: center; margin-top: 20px; font-size: 0.75rem; color: #94A3B8; }
+    
+    .success { display: none; text-align: center; padding: 40px 20px; }
+    .success.show { display: block; }
+    .success-icon { font-size: 4rem; margin-bottom: 16px; }
+    .success-title { font-size: 1.5rem; font-weight: 700; color: #059669; margin-bottom: 8px; }
+    .success-msg { color: #64748B; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <span class="logo">ZENDA</span>
+      <span class="verified">✓ Verified Merchant</span>
+    </div>
+    
+    <div class="card" id="paymentView">
+      <div class="vendor">
+        <div class="vendor-name" id="vendorName">Loading...</div>
+        <div class="vendor-label">Secure Checkout</div>
+      </div>
+      
+      <div class="order-card">
+        <div class="order-title">Order Details</div>
+        <div class="order-item" id="itemName">Loading...</div>
+        <div class="order-amount" id="amount">₦0</div>
+        <div class="order-customer" id="customerName"></div>
+      </div>
+      
+      <button class="btn-pay" id="payBtn" onclick="payNow()">
+        Pay Securely Now 🔒
+      </button>
+      
+      <a href="#" class="whatsapp" id="whatsappLink" target="_blank">
+        💬 Have a question? Chat with vendor
+      </a>
+      
+      <div class="security">
+        🔒 Your card details are secure and never shared
+      </div>
+    </div>
+    
+    <div class="success" id="successView">
+      <div class="success-icon">✅</div>
+      <div class="success-title">Payment Successful!</div>
+      <div class="success-msg">Thank you for your order. The vendor has been notified.</div>
+    </div>
+  </div>
+
+  <script>
+    const PAYSTACK_PUBLIC_KEY = 'pk_test_770b480653afc04bb6062d25ae0de0df736614ae';
+    
+    // Get invoice ID from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const invoiceId = urlParams.get('id');
+    
+    // Load invoice data
+    let invoice = null;
+    if (invoiceId) {
+      const data = localStorage.getItem('zenda_invoice_' + invoiceId);
+      if (data) {
+        invoice = JSON.parse(data);
+      }
+    }
+    
+    if (!invoice) {
+      document.getElementById('itemName').textContent = 'Demo Item';
+      document.getElementById('amount').textContent = '₦50,000';
+      document.getElementById('customerName').textContent = 'Demo Customer';
+      document.getElementById('vendorName').textContent = "Johnson's Test Store";
+    } else {
+      document.getElementById('itemName').textContent = invoice.item;
+      document.getElementById('amount').textContent = '₦' + invoice.amount.toLocaleString();
+      document.getElementById('customerName').textContent = 'Ordered by: ' + invoice.customer;
+      document.getElementById('vendorName').textContent = invoice.vendor;
+      
+      // Set WhatsApp link (using a placeholder number)
+      const waNumber = '2348000000000'; // Replace with vendor's actual number
+      const waMsg = encodeURIComponent(`Hi, I have a question about my order (${invoice.id})`);
+      document.getElementById('whatsappLink').href = `https://wa.me/${waNumber}?text=${waMsg}`;
+    }
+    
+    function payNow() {
+      const amount = invoice ? invoice.amount : 50000;
+      
+      const handler = PaystackPop.setup({
+        key: PAYSTACK_PUBLIC_KEY,
+        email: 'customer@example.com',
+        amount: amount * 100, // Paystack uses kobo
+        currency: 'NGN',
+        ref: 'ZENDA_' + Date.now(),
+        callback: function(response) {
+          // Payment successful
+          document.getElementById('paymentView').style.display = 'none';
+          document.getElementById('successView').classList.add('show');
+          
+          // Update invoice status
+          if (invoice) {
+            invoice.status = 'paid';
+            invoice.ref = response.reference;
+            localStorage.setItem('zenda_invoice_' + invoice.id, JSON.stringify(invoice));
+          }
+        },
+        onClose: function() {
+          alert('Payment cancelled');
+        }
+      });
+      
+      handler.openIframe();
+    }
+  </script>
+</body>
+</html>

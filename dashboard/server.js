@@ -75,13 +75,13 @@ app.get('/api/file/*', (req, res) => {
   }
 });
 
-// ZENDA routes
+// ZENDA routes - fixed paths
 app.get('/zenda', (req, res) => {
-  res.sendFile(path.join(__dirname, '../zenda/prototype.html'));
+  res.sendFile(path.join(__dirname, '../../zenda/prototype.html'));
 });
 
 app.get('/zenda/customer', (req, res) => {
-  res.sendFile(path.join(__dirname, '../zenda/customer_view.html'));
+  res.sendFile(path.join(__dirname, '../../zenda/customer_view.html'));
 });
 
 app.listen(PORT, () => {

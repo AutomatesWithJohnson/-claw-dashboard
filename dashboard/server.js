@@ -10,12 +10,23 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
 
+// Serve ZENDA files
+app.use('/zenda', express.static('public'));
+
+app.get('/zenda', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'zenda.html'));
+});
+
+app.get('/zenda/customer', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'customer.html'));
+});
+
 // Get file tree
 app.get('/api/files', (req, res) => {
   const workspacePath = '/data/workspace';
   const excludeDirs = ['node_modules', '.git', 'skills', 'dashboard', '.openclaw'];
   
-  function getTree(dir, prefix = '') {
+  function getTree(dir) {
     const items = [];
     try {
       const entries = fs.readdirSync(dir, { withFileTypes: true });
@@ -35,28 +46,22 @@ app.get('/api/files', (req, res) => {
   res.json(getTree(workspacePath));
 });
 
-// Read file content
 app.get('/api/file/*', (req, res) => {
   const filePath = req.params[0];
   const fullPath = path.join('/data/workspace', filePath);
   if (!fullPath.startsWith('/data/workspace/')) return res.status(403).json({ error: 'Access denied' });
   try {
     const ext = path.extname(filePath).toLowerCase();
-    const isText = ['.md', '.txt', '.json', '.js', '.ts', '.html', '.css', '.yaml', '.yml', '.xml', '.py', '.sh', '.sql'].includes(ext);
+    const isText = ['.md','.txt','.json','.js','.ts','.html','.css','.yaml','.yml','.xml','.py','.sh','.sql'].includes(ext);
     if (isText) {
-      const content = fs.readFileSync(fullPath, 'utf-8');
-      res.json({ content, isText: true });
+      res.json({ content: fs.readFileSync(fullPath, 'utf-8'), isText: true });
     } else {
-      res.json({ isText: false, message: 'Binary file - preview not available' });
+      res.json({ isText: false, message: 'Binary file' });
     }
   } catch (err) { res.status(404).json({ error: 'File not found' }); }
 });
 
-// ZENDA routes - now from public folder
-app.get('/zenda', (req, res) => { res.sendFile(path.join(__dirname, 'public', 'zenda.html')); });
-app.get('/zenda/customer', (req, res) => { res.sendFile(path.join(__dirname, 'public', 'customer.html')); });
-
 app.listen(PORT, () => {
-  console.log(`🦞 Dashboard on port ${PORT}`);
-  console.log(`⚡ ZENDA at /zenda`);
+  console.log(`Dashboard on port ${PORT}`);
+  console.log(`ZENDA: /zenda`);
 });

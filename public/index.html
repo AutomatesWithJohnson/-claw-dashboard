@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Johnson & Claw - Project Dashboard</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0d1117; color: #e6edf3; min-height: 100vh; }
+    
+    header { background: #161b22; padding: 20px 30px; border-bottom: 1px solid #30363d; display: flex; align-items: center; gap: 15px; }
+    header h1 { font-size: 1.5rem; }
+    .logo { width: 40px; height: 40px; background: linear-gradient(135deg, #f0883e, #a371f7); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
+    
+    .container { display: flex; min-height: calc(100vh - 81px); }
+    
+    .sidebar { width: 320px; background: #161b22; border-right: 1px solid #30363d; padding: 20px; overflow-y: auto; }
+    .sidebar h2 { font-size: 0.85rem; text-transform: uppercase; color: #8b949e; margin-bottom: 15px; letter-spacing: 1px; }
+    
+    .file-item { padding: 8px 12px; margin: 2px 0; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.9rem; transition: background 0.15s; }
+    .file-item:hover { background: #21262d; }
+    .file-item.active { background: #30363d; }
+    .file-item.folder { color: #58a6ff; font-weight: 500; }
+    .file-item.file { color: #e6edf3; }
+    .icon { width: 16px; text-align: center; }
+    
+    .main { flex: 1; padding: 30px; overflow-y: auto; }
+    .file-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+    .file-header h2 { font-size: 1.3rem; color: #58a6ff; }
+    .file-path { color: #8b949e; font-size: 0.9rem; }
+    
+    pre { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 20px; overflow-x: auto; font-size: 0.85rem; line-height: 1.6; color: #c9d1d9; }
+    code { font-family: 'Consolas', 'Monaco', monospace; }
+    
+    .empty-state { text-align: center; padding: 60px; color: #8b949e; }
+    .empty-state h3 { margin-bottom: 10px; color: #e6edf3; }
+    
+    .refresh-btn { background: #238636; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; }
+    .refresh-btn:hover { background: #2ea043; }
+    
+    .status { padding: 15px 30px; background: #161b22; border-top: 1px solid #30363d; font-size: 0.8rem; color: #8b949e; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">🐾</div>
+    <h1>Johnson & Claw Dashboard</h1>
+    <button class="refresh-btn" onclick="loadFiles()">🔄 Refresh</button>
+  </header>
+  
+  <div class="container">
+    <div class="sidebar">
+      <h2>📁 Projects</h2>
+      <div id="fileTree"></div>
+    </div>
+    
+    <div class="main">
+      <div id="content">
+        <div class="empty-state">
+          <h3>Welcome to Your Dashboard!</h3>
+          <p>Click on any file to view its contents.</p>
+          <p style="margin-top: 15px;">All projects we build together will appear here.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="status">
+    🤖 Claw is online • Running on MiniMax M2.5 • Last updated: <span id="lastUpdate"></span>
+  </div>
+
+  <script>
+    let currentPath = null;
+    
+    async function loadFiles() {
+      const res = await fetch('/api/files');
+      const files = await res.json();
+      renderTree(files, document.getElementById('fileTree'));
+      document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString();
+    }
+    
+    function renderTree(items, container) {
+      container.innerHTML = '';
+      items.sort((a, b) => {
+        if (a.type === 'directory' && b.type !== 'directory') return -1;
+        if (a.type !== 'directory' && b.type === 'directory') return 1;
+        return a.name.localeCompare(b.name);
+      });
+      
+      for (const item of items) {
+        const div = document.createElement('div');
+        div.className = `file-item ${item.type}`;
+        div.innerHTML = `<span class="icon">${item.type === 'directory' ? '📁' : '📄'}</span>${item.name}`;
+        
+        if (item.type === 'file') {
+          div.onclick = () => viewFile(item.path);
+        }
+        
+        container.appendChild(div);
+        
+        if (item.type === 'directory' && item.children && item.children.length > 0) {
+          const childContainer = document.createElement('div');
+          childContainer.style.paddingLeft = '20px';
+          renderTree(item.children, childContainer);
+          container.appendChild(childContainer);
+        }
+      }
+    }
+    
+    async function viewFile(filePath) {
+      currentPath = filePath;
+      const res = await fetch('/api/file/' + filePath);
+      const data = await res.json();
+      
+      const contentDiv = document.getElementById('content');
+      
+      if (data.isText) {
+        contentDiv.innerHTML = `
+          <div class="file-header">
+            <div>
+              <h2>${filePath.split('/').pop()}</h2>
+              <span class="file-path">${filePath}</span>
+            </div>
+          </div>
+          <pre><code>${escapeHtml(data.content)}</code></pre>
+        `;
+      } else {
+        contentDiv.innerHTML = `
+          <div class="file-header">
+            <h2>${filePath.split('/').pop()}</h2>
+          </div>
+          <div class="empty-state">
+            <p>${data.message}</p>
+          </div>
+        `;
+      }
+    }
+    
+    function escapeHtml(text) {
+      const map = { '&': '&', '<': '<', '>': '>', '"': '"', "'": ''' };
+      return text.replace(/[&<>"']/g, m => map[m]);
+    }
+    
+    loadFiles();
+  </script>
+</body>
+</html>

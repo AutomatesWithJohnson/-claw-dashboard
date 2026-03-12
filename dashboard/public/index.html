@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZENDA - Professional Invoices for Social Vendors</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+    body { background: #0a0a0a; color: white; min-height: 100vh; }
+    
+    .hero { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 20px; text-align: center; background: radial-gradient(ellipse at top, #1a1a2e 0%, #0a0a0a 70%); }
+    
+    .logo { font-size: 4rem; font-weight: 800; letter-spacing: -3px; background: linear-gradient(135deg, #6366f1, #a855f7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 8px; }
+    
+    h1 { font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 700; line-height: 1.1; margin-bottom: 24px; max-width: 800px; }
+    h1 span { background: linear-gradient(135deg, #6366f1, #a855f7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    
+    .tagline { font-size: 1.25rem; color: #9ca3af; margin-bottom: 40px; max-width: 500px; }
+    
+    .cta { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+    
+    .btn { padding: 16px 32px; border-radius: 12px; font-size: 1rem; font-weight: 600; text-decoration: none; transition: all 0.3s; }
+    .btn-primary { background: linear-gradient(135deg, #6366f1, #a855f7); color: white; border: none; }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 20px 40px rgba(99, 102, 241, 0.3); }
+    
+    .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; margin-top: 80px; max-width: 900px; }
+    .feature { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 24px; text-align: left; }
+    .feature-icon { font-size: 2rem; margin-bottom: 12px; }
+    .feature h3 { font-size: 1.1rem; margin-bottom: 8px; }
+    .feature p { color: #9ca3af; font-size: 0.9rem; line-height: 1.5; }
+    
+    .how { margin-top: 80px; max-width: 600px; }
+    .how h2 { font-size: 1.5rem; margin-bottom: 24px; }
+    .step { display: flex; gap: 16px; align-items: flex-start; margin-bottom: 20px; text-align: left; }
+    .step-num { width: 32px; height: 32px; background: linear-gradient(135deg, #6366f1, #a855f7); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0; }
+    .step p { color: #9ca3af; }
+    
+    .trust { margin-top: 60px; padding: 24px; background: rgba(255,255,255,0.03); border-radius: 12px; }
+    .trust p { color: #9ca3af; font-size: 0.9rem; }
+    
+    footer { margin-top: 80px; color: #6b7280; font-size: 0.85rem; }
+  </style>
+</head>
+<body>
+  <div class="hero">
+    <div class="logo">ZENDA</div>
+    <h1>Professional Invoices for <span>Social Vendors</span></h1>
+    <p class="tagline">Send beautiful payment links to your customers. Get paid faster with trust.</p>
+    
+    <div class="cta">
+      <a href="/zenda" class="btn btn-primary">Create Invoice →</a>
+    </div>
+    
+    <div class="features">
+      <div class="feature">
+        <div class="feature-icon">⚡</div>
+        <h3>Fast Setup</h3>
+        <p>Create a professional invoice in 15 seconds. No app download needed.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🔒</div>
+        <h3>Secure Payments</h3>
+        <p>Powered by Paystack. Your customers' card details are 100% safe.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">📱</div>
+        <h3>Mobile First</h3>
+        <p>Works perfectly on any phone. Perfect for WhatsApp & Instagram vendors.</p>
+      </div>
+    </div>
+    
+    <div class="how">
+      <h2>How It Works</h2>
+      <div class="step">
+        <div class="step-num">1</div>
+        <p>Create an invoice with customer name, item, and price</p>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <p>Send the link to your customer via WhatsApp or Instagram</p>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <p>They pay securely online. You get notified instantly.</p>
+      </div>
+    </div>
+    
+    <div class="trust">
+      <p>🔒 Secured by Paystack • Built for Nigerian vendors • No hidden fees</p>
+    </div>
+    
+    <footer>
+      © 2026 ZENDA. Built for vendors, by vendors.
+    </footer>
+  </div>
+</body>
+</html>

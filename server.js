@@ -9,6 +9,8 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
+app.use('/zenda', express.static('zenda'));
+app.use('/dashboard', express.static('dashboard/public'));
 
 // Get file tree
 app.get('/api/files', (req, res) => {
@@ -56,7 +58,7 @@ app.get('/api/file/*', (req, res) => {
   const fullPath = path.join('/data/workspace', filePath);
   
   // Security: prevent directory traversal
-  if (!fullPath.startsWith('/data/workspach/')) {
+  if (!fullPath.startsWith('/data/workspace/')) {
     return res.status(403).json({ error: 'Access denied' });
   }
   

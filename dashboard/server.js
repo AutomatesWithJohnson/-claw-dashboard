@@ -10,9 +10,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
 
-// Serve ZENDA files
-app.use('/zenda', express.static('public'));
-
+// ZENDA routes
 app.get('/zenda', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'zenda.html'));
 });
@@ -21,7 +19,7 @@ app.get('/zenda/customer', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'customer.html'));
 });
 
-// Get file tree
+// File tree API
 app.get('/api/files', (req, res) => {
   const workspacePath = '/data/workspace';
   const excludeDirs = ['node_modules', '.git', 'skills', 'dashboard', '.openclaw'];
@@ -62,6 +60,6 @@ app.get('/api/file/*', (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Dashboard on port ${PORT}`);
-  console.log(`ZENDA: /zenda`);
+  console.log(`Dashboard running on port ${PORT}`);
+  console.log(`ZENDA: https://your-url/zenda`);
 });

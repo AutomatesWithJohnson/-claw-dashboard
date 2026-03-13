@@ -38,6 +38,8 @@ function sign(queryString) {
 }
 
 async function apiCall(endpoint, method = 'GET', params = {}) {
+  // Binance requires timestamp for signed endpoints
+  params.timestamp = Date.now();
   const queryString = new URLSearchParams(params).toString();
   const signature = sign(queryString);
   const url = `${BASE_URL}${endpoint}?${queryString}&signature=${signature}`;
@@ -92,6 +94,8 @@ async function getMarketData() {
     limit: 100
   });
   
+  if (!candles) throw new Error('Failed to fetch market data');
+  
   const closes = candles.map(c => parseFloat(c[4]));
   const currentPrice = closes[closes.length - 1];
   
@@ -106,14 +110,19 @@ async function getMarketData() {
 
 async function getBalance() {
   const account = await apiCall('/fapi/v2/account', 'GET', {});
-  const btcBalance = account.assets.find(a => a.asset === 'BTC');
-  return parseFloat(btcBalance.availableBalance);
+  if (!account || !account.assets) {
+    console.error("Failed to fetch account balance. Please check your API keys.");
+    return 0;
+  }
+  const balanceAsset = account.assets.find(a => a.asset === 'USDT' || a.asset === 'BTC');
+  return balanceAsset ? parseFloat(balanceAsset.availableBalance) : 0;
 }
 
 async function getPosition() {
   const positions = await apiCall('/fapi/v2/positionRisk', 'GET', {
     symbol: CONFIG.symbol
   });
+  if (!positions || !Array.isArray(positions)) return null;
   const pos = positions.find(p => p.symbol === CONFIG.symbol && parseFloat(p.positionAmt) !== 0);
   return pos ? {
     amount: Math.abs(parseFloat(pos.positionAmt)),
@@ -271,7 +280,8 @@ function saveLogs() {
   };
   
   const fs = require('fs');
-  fs.writeFileSync('/data/workspace/trading-bot/logs.json', JSON.stringify(log, null, 2));
+  const path = require('path');
+  fs.writeFileSync(path.join(__dirname, 'logs.json'), JSON.stringify(log, null, 2));
 }
 
 // ============== MAIN LOOP ==============
